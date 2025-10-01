@@ -1,0 +1,94 @@
+const CACHE_NAME = 'wildlife-watch-guyana-v1';
+// Add index.html to the cache list
+const ASSETS_TO_CACHE = [
+    './',
+    './index.html', 
+    'https://cdn.tailwindcss.com',
+    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+];
+
+// 1. Install Service Worker and Cache Assets
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                console.log('Service Worker: Caching app assets');
+                return cache.addAll(ASSETS_TO_CACHE);
+            })
+            .catch(err => {
+                console.error('Service Worker: Failed to open cache: ', err);
+            })
+    );
+});
+
+// 2. Activate Service Worker and Clean Up Old Caches
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cache => {
+                    if (cache !== CACHE_NAME) {
+                        console.log('Service Worker: Clearing old cache');
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        })
+    );
+});
+
+// 3. Serve from Cache (Cache-First Strategy)
+self.addEventListener('fetch', event => {
+    // We only want to cache GET requests.
+    if (event.request.method !== 'GET') {
+        return;
+    }
+    
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                // Cache hit - return response from cache
+                if (response) {
+                    return response;
+                }
+                // Not in cache - fetch from network
+                return fetch(event.request);
+            })
+    );
+});
+
+// 4. Background Sync for Offline Reports
+self.addEventListener('sync', event => {
+    if (event.tag === 'send-reports') {
+        console.log('Service Worker: Sync event triggered.');
+        event.waitUntil(
+            self.registration.showNotification('Wildlife Reports Pending', {
+                body: 'You have offline reports to send. Tap here to open the app and send them.',
+                icon: 'https://placehold.co/192x192/16a34a/ffffff?text=WGY',
+                badge: 'https://placehold.co/96x96/16a34a/ffffff?text=!',
+                tag: 'pending-reports-notification'
+            })
+        );
+    }
+});
+
+// 5. Handle Notification Click
+self.addEventListener('notificationclick', event => {
+    event.notification.close(); // Close the notification
+
+    // This opens the app to the start URL, which is index.html
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+            if (clientList.length > 0) {
+                let client = clientList[0];
+                for (let i = 0; i < clientList.length; i++) {
+                    if (clientList[i].focused) {
+                        client = clientList[i];
+                    }
+                }
+                return client.focus();
+            }
+            return clients.openWindow('./index.html');
+        })
+    );
+});
