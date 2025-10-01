@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,8 +6,8 @@
     <title>Wildlife Watch Guyana</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#16a34a">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#22c55e">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .loader {
@@ -22,10 +22,22 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        #error-modal, #success-modal, #info-modal { transition: opacity 0.3s ease-in-out; }
+        #error-modal, #success-modal, #info-modal, #species-info-modal { transition: opacity 0.3s ease-in-out; }
         .accordion-content {
-            transition: max-height 0.3s ease-out;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
             overflow: hidden;
+            max-height: 0;
+        }
+        .accordion-content.open {
+             max-height: 1000px; /* Adjust as needed */
+        }
+        .prose-headings\:text-lg h3 {
+            font-size: 1.125rem; /* 18px */
+            line-height: 1.75rem; /* 28px */
+        }
+        .prose-p\:text-base p {
+             font-size: 1rem; /* 16px */
+             line-height: 1.5rem; /* 24px */
         }
     </style>
 </head>
@@ -39,7 +51,8 @@
         </header>
 
         <!-- Install App Button -->
-        <div id="install-container" class="text-center mb-4">
+        <div id="install-container" class="text-center mb-4 bg-gray-200 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 mb-2">For the best experience, install the app on your device. The download button will appear below if your browser supports it.</p>
             <button id="install-btn" class="hidden w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
                 Download App for Offline Use
@@ -50,9 +63,9 @@
 
             <!-- Step 1 Accordion -->
             <div>
-                <button type="button" class="w-full flex items-center justify-between text-left text-xl font-semibold text-gray-700" data-toggle="step-1-content">
+                <button type="button" class="accordion-toggle w-full flex items-center justify-between text-left text-xl font-semibold text-gray-700" data-target="step-1-content">
                     <span>Step 1: Select a Photo</span>
-                    <svg class="w-5 h-5 transform transition-transform rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                    <svg class="w-5 h-5 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </button>
                 <div id="step-1-content" class="accordion-content mt-4">
                     <div class="bg-gray-50 p-6 rounded-lg border-2 border-dashed border-gray-300 text-center">
@@ -75,22 +88,25 @@
 
                 <!-- Step 2 Accordion -->
                 <div>
-                    <button type="button" class="w-full flex items-center justify-between text-left text-xl font-semibold text-gray-700" data-toggle="step-2-content">
+                    <button type="button" class="accordion-toggle w-full flex items-center justify-between text-left text-xl font-semibold text-gray-700" data-target="step-2-content">
                         <span>Step 2: Sighting Details</span>
                         <svg class="w-5 h-5 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                     </button>
-                    <div id="step-2-content" class="accordion-content hidden mt-4">
+                    <div id="step-2-content" class="accordion-content mt-4">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Identified Species (Scientific Name)</label>
-                                <p id="scientific-name" class="mt-1 text-lg font-semibold bg-green-50 p-3 rounded-md border border-green-200"></p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p id="scientific-name" class="flex-grow text-lg font-semibold bg-green-50 p-3 rounded-md border border-green-200"></p>
+                                    <button id="get-species-info-btn" class="hidden bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-all">✨ Get Info</button>
+                                </div>
                             </div>
                             <div id="gps-auto-container">
                                 <label class="block text-sm font-medium text-gray-700">GPS Coordinates</label>
                                 <p id="gps-coords" class="mt-1 text-md bg-gray-50 p-3 rounded-md border"></p>
                             </div>
                             <div id="gps-manual-container" class="hidden">
-                                <label class="block text-sm font-medium text-gray-700">Enter GPS Coordinates</label>
+                                <label class="block text-sm font-medium text-gray-700">Enter GPS Coordinates (if unavailable)</label>
                                 <div class="flex gap-2 mt-1">
                                     <input type="number" id="manual-lat" placeholder="Latitude (e.g., 6.8045)" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
                                     <input type="number" id="manual-lon" placeholder="Longitude (e.g., -58.1551)" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
@@ -104,15 +120,21 @@
 
                 <!-- Step 3 Accordion -->
                  <div>
-                    <button type="button" class="w-full flex items-center justify-between text-left text-xl font-semibold text-gray-700" data-toggle="step-3-content">
+                    <button type="button" class="accordion-toggle w-full flex items-center justify-between text-left text-xl font-semibold text-gray-700" data-target="step-3-content">
                         <span>Step 3: Your Details (Optional)</span>
                         <svg class="w-5 h-5 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                     </button>
-                    <div id="step-3-content" class="accordion-content hidden mt-4">
+                    <div id="step-3-content" class="accordion-content mt-4">
                          <form id="contact-form" class="space-y-4">
                             <div><label for="user-name" class="block text-sm font-medium text-gray-700">Your Name</label><input type="text" id="user-name" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"></div>
                             <div><label for="user-contact" class="block text-sm font-medium text-gray-700">Email or Phone</label><input type="text" id="user-contact" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"></div>
-                            <div><label for="user-notes" class="block text-sm font-medium text-gray-700">Additional Notes</label><textarea id="user-notes" rows="3" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="e.g., Animal behavior, time of day..."></textarea></div>
+                            <div>
+                                <div class="flex justify-between items-center">
+                                    <label for="user-notes" class="block text-sm font-medium text-gray-700">Additional Notes</label>
+                                    <button type="button" id="suggest-notes-btn" class="text-sm bg-purple-500 text-white py-1 px-2 rounded-md hover:bg-purple-600 transition-all">✨ Suggest Notes</button>
+                                </div>
+                                <textarea id="user-notes" rows="3" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="e.g., Animal behavior, time of day..."></textarea>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -126,9 +148,26 @@
     </div>
 
     <!-- Modals -->
-    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl text-center"><h3 class="text-xl font-bold text-red-600 mb-2">Error</h3><p id="error-message" class="text-gray-700 mb-4"></p><button id="close-error-modal" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Close</button></div></div>
-    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl text-center"><div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4"><svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h3 class="text-xl font-bold text-green-700 mb-2">Report Sent</h3><p class="text-gray-700 mb-4">Your email client should be open. Please review and send.</p><button id="close-success-modal" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Got it!</button></div></div>
-    <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0"><div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl text-center"><div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4"><svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h3 class="text-xl font-bold text-blue-700 mb-2">Information</h3><p id="info-message" class="text-gray-700 mb-4"></p><button id="close-info-modal" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">OK</button></div></div>
+    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0 z-50"><div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl text-center"><h3 class="text-xl font-bold text-red-600 mb-2">Error</h3><p id="error-message" class="text-gray-700 mb-4"></p><button id="close-error-modal" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Close</button></div></div>
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0 z-50"><div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl text-center"><div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4"><svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h3 class="text-xl font-bold text-green-700 mb-2">Report Sent</h3><p class="text-gray-700 mb-4">Your email client should be open. Please review and send.</p><button id="close-success-modal" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Got it!</button></div></div>
+    <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0 z-50"><div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl text-center"><div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4"><svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h3 class="text-xl font-bold text-blue-700 mb-2">Report Saved Offline</h3><p id="info-message" class="text-gray-700 mb-4"></p><button id="close-info-modal" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">OK</button></div></div>
+    
+    <!-- Species Info Modal -->
+    <div id="species-info-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0 z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl text-left max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                 <h3 id="species-info-title" class="text-2xl font-bold text-green-700">Species Information</h3>
+                 <button id="close-species-info-modal" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="species-info-content" class="prose prose-p:text-base prose-headings:text-lg space-y-4">
+                <!-- Gemini content will be injected here -->
+                <div class="flex justify-center items-center h-32">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // DOM Elements
@@ -138,6 +177,7 @@
             sightingDetails: document.getElementById('sighting-details'),
             loaderContainer: document.getElementById('loader-container'),
             scientificNameEl: document.getElementById('scientific-name'),
+            getSpeciesInfoBtn: document.getElementById('get-species-info-btn'),
             gpsCoordsEl: document.getElementById('gps-coords'),
             gpsAutoContainer: document.getElementById('gps-auto-container'),
             gpsManualContainer: document.getElementById('gps-manual-container'),
@@ -148,13 +188,20 @@
             userName: document.getElementById('user-name'),
             userContact: document.getElementById('user-contact'),
             userNotes: document.getElementById('user-notes'),
+            suggestNotesBtn: document.getElementById('suggest-notes-btn'),
             installBtn: document.getElementById('install-btn'),
         };
 
         const modals = {
             error: { el: document.getElementById('error-modal'), msg: document.getElementById('error-message'), btn: document.getElementById('close-error-modal') },
             success: { el: document.getElementById('success-modal'), btn: document.getElementById('close-success-modal') },
-            info: { el: document.getElementById('info-modal'), msg: document.getElementById('info-message'), btn: document.getElementById('close-info-modal') }
+            info: { el: document.getElementById('info-modal'), msg: document.getElementById('info-message'), btn: document.getElementById('close-info-modal') },
+            speciesInfo: { 
+                el: document.getElementById('species-info-modal'), 
+                btn: document.getElementById('close-species-info-modal'),
+                title: document.getElementById('species-info-title'),
+                content: document.getElementById('species-info-content')
+            }
         };
 
         // --- State ---
@@ -188,145 +235,144 @@
         });
         
         elements.photoInput.addEventListener('change', handlePhotoSelect);
-        elements.resetBtn.addEventListener('click', () => resetApp(false));
+        elements.resetBtn.addEventListener('click', () => resetApp());
         elements.sendReportBtn.addEventListener('click', processReport);
+        elements.getSpeciesInfoBtn.addEventListener('click', getSpeciesInfo);
+        elements.suggestNotesBtn.addEventListener('click', suggestNotes);
+
         modals.error.btn.addEventListener('click', () => toggleModal(modals.error, false));
         modals.success.btn.addEventListener('click', () => toggleModal(modals.success, false));
         modals.info.btn.addEventListener('click', () => toggleModal(modals.info, false));
+        modals.speciesInfo.btn.addEventListener('click', () => toggleModal(modals.speciesInfo, false));
 
         // --- Accordion Logic ---
         function setupAccordions() {
-            document.querySelectorAll('[data-toggle]').forEach(toggle => {
-                const content = document.getElementById(toggle.dataset.toggle);
-                const icon = toggle.querySelector('svg');
-                
-                // Set initial animated state based on HTML class
-                if (content.classList.contains('hidden')) {
-                    content.style.maxHeight = '0px';
-                } else {
-                     // Let it calculate height after render
-                    setTimeout(() => content.style.maxHeight = content.scrollHeight + 'px', 0);
-                }
-                content.classList.remove('hidden'); // Use max-height for transitions
-
+            const toggles = document.querySelectorAll('.accordion-toggle');
+            toggles.forEach(toggle => {
                 toggle.addEventListener('click', () => {
-                    if (content.style.maxHeight === '0px') {
-                        content.style.maxHeight = content.scrollHeight + 'px';
-                        icon.classList.add('rotate-180');
-                    } else {
-                        content.style.maxHeight = '0px';
-                        icon.classList.remove('rotate-180');
-                    }
+                    toggleAccordion(toggle.dataset.target);
                 });
             });
-        }
-        
-        function expandAccordion(contentId) {
-            const content = document.getElementById(contentId);
-            const toggle = document.querySelector(`[data-toggle="${contentId}"]`);
-            if (content && toggle && content.style.maxHeight === '0px') {
-                content.style.maxHeight = content.scrollHeight + 'px';
-                toggle.querySelector('svg').classList.add('rotate-180');
-            }
+             // Start with first accordion open
+            toggleAccordion('step-1-content', true);
         }
 
-        function collapseAccordion(contentId) {
+        function toggleAccordion(contentId, forceOpen = null) {
             const content = document.getElementById(contentId);
-            const toggle = document.querySelector(`[data-toggle="${contentId}"]`);
-            if (content && toggle && content.style.maxHeight !== '0px') {
-                content.style.maxHeight = '0px';
-                toggle.querySelector('svg').classList.remove('rotate-180');
+            const toggle = document.querySelector(`[data-target="${contentId}"]`);
+            if (!content || !toggle) return;
+
+            const icon = toggle.querySelector('svg');
+            const isOpen = content.classList.contains('open');
+
+            if (forceOpen === true || (forceOpen === null && !isOpen)) {
+                content.classList.add('open');
+                content.style.paddingTop = '1rem';
+                content.style.paddingBottom = '1rem';
+                icon.classList.add('rotate-180');
+            } else if (forceOpen === false || (forceOpen === null && isOpen)) {
+                content.classList.remove('open');
+                content.style.paddingTop = '0';
+                content.style.paddingBottom = '0';
+                icon.classList.remove('rotate-180');
             }
         }
 
         // --- Database ---
         function initDb() {
-            const request = indexedDB.open('wildlifeDB', 1);
+            const request = indexedDB.open('wildlifeDB', 2);
             request.onupgradeneeded = event => {
                 db = event.target.result;
-                db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
+                if (!db.objectStoreNames.contains('reports')) {
+                    db.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
+                }
             };
             request.onsuccess = event => { db = event.target.result; };
             request.onerror = event => console.error('DB Error:', event.target.errorCode);
         }
 
         function saveReportOffline(report) {
-            if (!db) return;
+            if (!db) {
+                toggleModal(modals.error, true, 'Database not available.');
+                return;
+            }
             const transaction = db.transaction(['reports'], 'readwrite');
             const store = transaction.objectStore('reports');
             store.add(report);
             transaction.oncomplete = () => {
-                toggleModal(modals.info, true, "No internet connection. Your report has been saved and will be sent automatically when you're back online.");
-                setTimeout(() => resetApp(false), 3000);
+                toggleModal(modals.info, true, "No internet connection. Report saved. It will be sent when you're back online.");
+                 if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                    navigator.serviceWorker.ready.then(sw => sw.sync.register('send-reports'));
+                }
+                setTimeout(resetApp, 3000);
             };
-            transaction.onerror = (e) => console.error('Error saving report offline:', e);
+             transaction.onerror = (event) => {
+                toggleModal(modals.error, true, `Failed to save report offline: ${event.target.error}`);
+            };
+        }
+        
+        async function checkPendingReports() {
+             if (!db) {
+                setTimeout(checkPendingReports, 100);
+                return;
+            }
+            const transaction = db.transaction(['reports'], 'readonly');
+            const store = transaction.objectStore('reports');
+            const countRequest = store.count();
+            countRequest.onsuccess = () => {
+                if (countRequest.result > 0 && navigator.onLine) {
+                     toggleModal(modals.info, true, `You have ${countRequest.result} pending report(s) that will be sent in the background.`);
+                }
+            };
         }
 
         // --- Core App Logic ---
         function registerServiceWorker() {
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./service-worker.js')
+                // Use a path relative to the origin to avoid issues with blob URLs in preview environments.
+                navigator.serviceWorker.register('/service-worker.js')
                     .then(reg => console.log('Service worker registration successful:', reg))
                     .catch(err => console.error('Service worker registration failed:', err));
             }
         }
         
-        function checkPendingReports() {
-            // Wait for DB to be initialized
-            if (!db) {
-                setTimeout(checkPendingReports, 100);
-                return;
-            }
-            // Only try to send if online
-            if (!navigator.onLine) return;
-            
-            const transaction = db.transaction(['reports'], 'readwrite');
-            const store = transaction.objectStore('reports');
-            const getAllRequest = store.getAll();
-
-            getAllRequest.onsuccess = () => {
-                const reports = getAllRequest.result;
-                if (reports.length > 0) {
-                    toggleModal(modals.info, true, `You have ${reports.length} pending report(s). Attempting to send them now...`);
-                    reports.forEach(report => {
-                        generateEmail(report); // This opens mailto for each report
-                        store.delete(report.id); // Delete from DB after opening mail client
-                    });
-                }
-            };
-            getAllRequest.onerror = (event) => console.error("Could not get reports from db", event);
-        }
-
         async function handlePhotoSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            resetApp(true); // Soft reset
+            resetApp(true);
             elements.sightingDetails.classList.remove('hidden');
             elements.loaderContainer.classList.remove('hidden');
-            collapseAccordion('step-1-content');
+            toggleAccordion('step-1-content', false);
             
             try {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     elements.photoPreview.src = e.target.result;
                     sightingData.imageData = e.target.result.split(',')[1];
+                    
                     const [location, species] = await Promise.all([getLocation(), identifySpecies(sightingData.imageData)]);
+                    
                     sightingData.latitude = location.latitude;
                     sightingData.longitude = location.longitude;
                     sightingData.scientificName = species;
+
                     updateUIWithData();
                 };
                 reader.readAsDataURL(file);
             } catch (error) {
-                console.error("Processing error:", error);
-                toggleModal(modals.error, true, error.message);
-                resetApp(false);
+                toggleModal(modals.error, true, `An error occurred: ${error.message}`);
+                resetApp();
             }
         }
         
         function updateUIWithData() {
-            elements.scientificNameEl.textContent = sightingData.scientificName || 'Could not identify';
+            elements.scientificNameEl.textContent = sightingData.scientificName || 'Could not identify. Check connection.';
+             if (sightingData.scientificName && !sightingData.scientificName.toLowerCase().includes('not an animal')) {
+                elements.getSpeciesInfoBtn.classList.remove('hidden');
+            } else {
+                 elements.getSpeciesInfoBtn.classList.add('hidden');
+            }
             if (sightingData.latitude && sightingData.longitude) {
                 elements.gpsCoordsEl.textContent = `${sightingData.latitude.toFixed(5)}, ${sightingData.longitude.toFixed(5)}`;
                 elements.gpsAutoContainer.classList.remove('hidden');
@@ -336,8 +382,8 @@
                 elements.gpsManualContainer.classList.remove('hidden');
             }
             elements.loaderContainer.classList.add('hidden');
-            expandAccordion('step-2-content');
-            expandAccordion('step-3-content');
+            toggleAccordion('step-2-content', true);
+            toggleAccordion('step-3-content', true);
         }
 
         function getLocation() {
@@ -351,32 +397,99 @@
             });
         }
         
-        async function identifySpecies(base64ImageData) {
+        // --- Gemini API Functions ---
+        async function callGeminiAPI(payload) {
             const apiKey = ""; // API Key will be injected by the environment
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            const payload = { contents: [{ parts: [{ text: "Identify the animal in this image and provide only its scientific name. If it's not an animal, say 'Not an animal'." }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } }] }] };
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                if (!response.ok) throw new Error(`API Error: ${response.statusText} (${response.status})`);
                 const result = await response.json();
-                return result.candidates[0]?.content?.parts[0]?.text.trim() || 'Identification failed';
+                if (result.candidates && result.candidates.length > 0) {
+                     return result.candidates[0]?.content?.parts[0]?.text.trim() || null;
+                }
+                return null;
             } catch (error) {
                 console.error("Gemini API error:", error);
-                return 'Identification requires internet';
+                toggleModal(modals.error, true, `Could not connect to Gemini API. ${error.message}`);
+                return null;
             }
         }
 
+        async function identifySpecies(base64ImageData) {
+            if (!navigator.onLine) return 'Identification requires internet';
+            const payload = { contents: [{ parts: [{ text: "Identify the animal in this image and provide only its scientific name. If it's not an animal, say 'Not an animal'." }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } }] }] };
+            const result = await callGeminiAPI(payload);
+            return result || 'Identification failed';
+        }
+
+        async function getSpeciesInfo() {
+            if (!sightingData.scientificName || !navigator.onLine) {
+                toggleModal(modals.error, true, 'Cannot get species info. Check scientific name and internet connection.');
+                return;
+            }
+            modals.speciesInfo.content.innerHTML = '<div class="flex justify-center items-center h-32"><div class="loader"></div></div>';
+            toggleModal(modals.speciesInfo, true);
+            
+            const systemPrompt = "You are a wildlife expert specializing in Guyanese fauna. Provide a concise, well-formatted fact sheet using markdown. Use headings for each section.";
+            const userQuery = `Generate a fact sheet for the species: ${sightingData.scientificName}. Include: Common Name(s), Habitat in Guyana, Conservation Status, and Fun Facts. Finally, add a section called 'Conservation Tip' with one simple, actionable tip for a citizen in Guyana to help this species or its habitat.`;
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                tools: [{ "google_search": {} }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+            
+            const result = await callGeminiAPI(payload);
+            
+            if (result) {
+                // Basic markdown to HTML conversion
+                let htmlResult = result
+                    .replace(/### (.*?)\n/g, '<h3 class="font-bold text-green-600 mt-4">$1</h3>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\* ([^*]+)/g, '<p>$1</p>');
+                modals.speciesInfo.title.textContent = `Info: ${sightingData.scientificName}`;
+                modals.speciesInfo.content.innerHTML = htmlResult;
+            } else {
+                modals.speciesInfo.content.innerHTML = '<p>Could not retrieve information at this time.</p>';
+            }
+        }
+
+        async function suggestNotes() {
+            if (!sightingData.scientificName || !navigator.onLine) {
+                toggleModal(modals.error, true, 'Cannot suggest notes without a species and internet connection.');
+                return;
+            }
+            elements.suggestNotesBtn.disabled = true;
+            elements.suggestNotesBtn.textContent = '...';
+            const userQuery = `A wildlife sighting of a ${sightingData.scientificName} was made in Guyana. Suggest a brief, helpful observation note for a report. Mention potential behavior (like foraging, resting, etc.) based on this animal's typical habits.`;
+            const payload = { contents: [{ parts: [{ text: userQuery }] }] };
+            const result = await callGeminiAPI(payload);
+            if (result) {
+                elements.userNotes.value = result;
+            }
+            elements.suggestNotesBtn.disabled = false;
+            elements.suggestNotesBtn.innerHTML = '✨ Suggest Notes';
+        }
+        
+        // --- Report Processing ---
         function processReport() {
+            if (!sightingData.imageData) {
+                toggleModal(modals.error, true, 'Please select a photo first.');
+                return;
+            }
+
             const report = { ...sightingData };
             report.userName = elements.userName.value;
             report.userContact = elements.userContact.value;
             report.userNotes = elements.userNotes.value;
+            
             if (!report.latitude || !report.longitude) {
-                report.latitude = elements.manualLat.value || '6.8045';
-                report.longitude = elements.manualLon.value || '-58.1551';
+                report.latitude = elements.manualLat.value || null;
+                report.longitude = elements.manualLon.value || null;
             }
-            if (!report.scientificName || !report.imageData) {
-                toggleModal(modals.error, true, 'Please select a photo first so a report can be generated.');
+
+            if (!report.latitude || !report.longitude) {
+                toggleModal(modals.error, true, 'GPS coordinates are required. Please enable location services or enter them manually.');
                 return;
             }
 
@@ -384,16 +497,16 @@
                 generateEmail(report);
             } else {
                 saveReportOffline(report);
-                if ('serviceWorker' in navigator && 'SyncManager' in window) {
-                    navigator.serviceWorker.ready.then(sw => sw.sync.register('send-reports'));
-                }
             }
         }
 
         function generateEmail(report) {
             const recipient = 'wildlifewatchgy@gmail.com';
             const subject = `Wildlife Sighting Report: ${report.scientificName}`;
-            const body = `A new wildlife sighting has been reported.\n\n---DETAILS---\nSpecies (Scientific Name): ${report.scientificName}\nLocation (Lat, Lon): ${report.latitude}, ${report.longitude}\n\n---OBSERVER (Optional)---\nName: ${report.userName || 'Not provided'}\nContact: ${report.userContact || 'Not provided'}\nNotes: \n${report.userNotes || 'None'}\n\n---\nThis report was generated by the Wildlife Watch Guyana App. The image is attached.`;
+            let body = `A new wildlife sighting has been reported.\n\n---DETAILS---\nSpecies (Scientific Name): ${report.scientificName}\nLocation (Lat, Lon): ${report.latitude}, ${report.longitude}\n\n---OBSERVER (Optional)---\nName: ${report.userName || 'Not provided'}\nContact: ${report.userContact || 'Not provided'}\nNotes: \n${report.userNotes || 'None'}\n\n---\nThis report was generated by the Wildlife Watch Guyana App.`;
+            
+            body += "\n\n(Image was captured but cannot be attached via this link.)";
+
             window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             toggleModal(modals.success, true);
         }
@@ -402,15 +515,19 @@
         function resetApp(isProcessing = false) {
             sightingData = {};
             if (!isProcessing) {
-                 elements.photoInput.value = '';
-                 elements.photoPreview.src = '#';
-                 elements.sightingDetails.classList.add('hidden');
+                elements.photoInput.value = '';
+                elements.photoPreview.src = '#';
+                elements.sightingDetails.classList.add('hidden');
             }
+            elements.getSpeciesInfoBtn.classList.add('hidden');
             elements.loaderContainer.classList.add('hidden');
-            collapseAccordion('step-2-content');
-            collapseAccordion('step-3-content');
-            expandAccordion('step-1-content');
             document.getElementById('contact-form').reset();
+            elements.manualLat.value = '';
+            elements.manualLon.value = '';
+            
+            toggleAccordion('step-1-content', true);
+            toggleAccordion('step-2-content', false);
+            toggleAccordion('step-3-content', false);
         }
 
         function toggleModal(modal, show, message = '') {
@@ -426,3 +543,4 @@
     </script>
 </body>
 </html>
+
